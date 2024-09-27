@@ -1,0 +1,51 @@
+version: '2'
+
+
+services:
+  airflow_db: 
+    image: postgres:16.0
+    environment:
+      - POSTRGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+
+  airflow_webserver:
+    command: bash -c "airflow db init && airflow webserver && airflow users  create --role Admin --username admin --email admin --firstname admin --lastname admin --password admin"
+
+    image: apache/airflow:latest
+    restart: always
+    depends_on:
+      - airflow_db
+    environment:
+      - LOAD_EX=${LOAD_EX}
+      - EXECUTOR=${EXECUTOR}
+      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@airflow_db:5432/${POSTGRES_DB}
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./requirements.txt:/opt/airflow/requirements.txt
+    ports:
+      - "8080:8080"
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    ports: 
+      - "2181:2181"
+    environment: 
+      - ZOOKEEPER_CLIENT_PORT=${ZOOKEEPER_CLIENT_PORT}
+      - ZOOKEEPER_SERVER_ID=${ZOOKEEPER_SERVER_ID}
+      - ZOOKEEPER_SERVERS=kafka_zookeeper:2888:3888
+    networks: 
+      - kafka_network
+      - default
+  kafka_base:
+    image: confluentic/cp-kafka:latest
+    environment: 
+      - KAKFA_LISTENER_SECURITY_PROTOCIL_MAP=${KAKFA_LISTENER_SECURITY_PROTOCIL_MAP}
+      - KAFKA_INTER_BROKER_LISTENER_NAME=${KAFKA_INTER_BROKER_LISTENER_NAME}
+      - KAFKA_ZOOKEEPER_CONNECT=kafka_zookeeper:2181
+      - KAFKA_LOG4J_LOGGERS=${KAFKA_LOG4J_LOGGERS}
+      - KAFKA_AUTHORIZER_CLASS_NAME=${KAFKA_AUTHORIZER_CLASS_NAME}
+      - KAFKA_ALLOW_EVERYONE_IF_NO_ACL_FOUND=${KAFKA_ALLOW_EVERYONE_IF_NO_ACL_FOUND}
+    networks: 
+      - kafka_network
+      - default
+
