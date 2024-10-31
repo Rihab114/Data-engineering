@@ -39,7 +39,7 @@ def fetch_data():
 
 # define dag
 with DAG(
-    'kafka_streaming_pipeline',
+    'kafka_streaming_pipeline_3',
     description='Kafka streaming pipeline',
     start_date=datetime.datetime(2024, 10, 10),
     schedule_interval="*/15 * * * *",

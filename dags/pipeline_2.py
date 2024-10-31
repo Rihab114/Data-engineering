@@ -21,7 +21,7 @@ def fetch_data():
     limit = 100
     while True:
         url = f"https://opendata.paris.fr/api/explore/v2.1/catalog/datasets/velib-disponibilite-en-temps-reel/records?limit={limit}&offset={offset}"
-        topic = 'velib'
+        topic = 'velib_test'
         print('Getting data from api!')
         data = requests.get(url).json()
         if data['results']:
@@ -39,7 +39,7 @@ def fetch_data():
 
 # define dag
 with DAG(
-    'kafka_streaming_pipeline',
+    'kafka_streaming_pipeline_2',
     description='Kafka streaming pipeline',
     start_date=datetime.datetime(2024, 10, 10),
     schedule_interval="*/15 * * * *",
